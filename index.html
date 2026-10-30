@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>칼퇴치트키 30초 맛보기 | 빠른 실행 도구 모음(QAT)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SheetJS CDN -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    * { font-family: 'Pretendard', sans-serif; }
+    .excel-grid {
+      border-collapse: collapse;
+    }
+    .excel-grid th, .excel-grid td {
+      border: 1px solid #d1d5db;
+      user-select: none;
+    }
+    .excel-grid th {
+      background-color: #f3f4f6;
+      font-size: 11px;
+      color: #6b7280;
+    }
+    .excel-grid td.selected {
+      outline: 2px solid #107c41;
+      background-color: #ecfdf5 !important;
+    }
+    .badge-pop {
+      animation: popIn 0.15s ease-out forwards;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center p-3 md:p-6">
+
+  <!-- Header Banner -->
+  <header class="w-full max-w-4xl flex flex-col md:flex-row justify-between items-center bg-slate-800 border border-slate-700 rounded-2xl p-5 mb-5 shadow-xl gap-4">
+    <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold mb-2">
+        <i class="fa-solid fa-bolt"></i> 엑셀 선배의 칼퇴 치트키 #01
+      </div>
+      <h1 class="text-xl md:text-2xl font-black text-white">단축키 100개 외우지 마! <span class="text-emerald-400">Alt + 1,2,3</span> 맛보기</h1>
+      <p class="text-xs md:text-sm text-slate-400 mt-1">키보드에서 실제 <kbd class="px-1.5 py-0.5 bg-slate-700 text-amber-300 rounded font-mono text-xs border border-slate-600">Alt</kbd> 키를 톡 누르거나 아래 버튼을 눌러봐.</p>
+    </div>
+    
+    <!-- 실습용 엑셀 다운로드 버튼 -->
+    <button id="downloadXlsxBtn" class="w-full md:w-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-3 rounded-xl shadow-lg shadow-emerald-900/40 hover:scale-[1.02] active:scale-[0.98] transition-all">
+      <i class="fa-solid fa-file-excel text-lg"></i>
+      <span>실습용 원본 파일 다운 (.xlsx)</span>
+    </button>
+  </header>
+
+  <!-- Main Container -->
+  <main class="w-full max-w-4xl bg-slate-800/90 border border-slate-700 rounded-2xl p-4 md:p-6 shadow-2xl flex flex-col gap-5">
+    
+    <!-- QAT Toolbar Simulation -->
+    <div class="bg-slate-950 p-3 rounded-xl border border-slate-700/80 flex flex-col gap-2">
+      <div class="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-slate-800">
+        <span class="font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-bars-staggered text-emerald-400"></i> 내 빠른 실행 도구 모음 (QAT 슬롯)
+        </span>
+        <span class="text-[11px] text-amber-400/90 bg-amber-400/10 px-2 py-0.5 rounded">
+          💡 키보드 단축키 작동 중 (키보드 Alt -> 1~5 입력 가능)
+        </span>
+      </div>
+
+      <!-- Quick Access Buttons Bar -->
+      <div class="flex flex-wrap items-center gap-2 pt-1 relative" id="toolbarSlot">
+        <!-- Slot 1 -->
+        <button onclick="triggerAction(1)" class="relative group flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs transition">
+          <span id="badge-1" class="hidden absolute -top-2.5 -right-1 bg-amber-400 text-slate-950 font-black text-[11px] px-1.5 rounded shadow badge-pop border border-amber-300">1</span>
+          <i class="fa-solid fa-clipboard-check text-emerald-400 text-sm"></i>
+          <span>값 붙여넣기</span>
+        </button>
+
+        <!-- Slot 2 -->
+        <button onclick="triggerAction(2)" class="relative group flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs transition">
+          <span id="badge-2" class="hidden absolute -top-2.5 -right-1 bg-amber-400 text-slate-950 font-black text-[11px] px-1.5 rounded shadow badge-pop border border-amber-300">2</span>
+          <i class="fa-solid fa-filter text-orange-400 text-sm"></i>
+          <span>필터 (자동 필터)</span>
+        </button>
+
+        <!-- Slot 3 -->
+        <button onclick="triggerAction(3)" class="relative group flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs transition">
+          <span id="badge-3" class="hidden absolute -top-2.5 -right-1 bg-amber-400 text-slate-950 font-black text-[11px] px-1.5 rounded shadow badge-pop border border-amber-300">3</span>
+          <i class="fa-solid fa-arrows-to-dot text-purple-400 text-sm"></i>
+          <span>병합하고 가운데 맞춤</span>
+        </button>
+
+        <!-- Slot 4 -->
+        <button onclick="triggerAction(4)" class="relative group flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs transition">
+          <span id="badge-4" class="hidden absolute -top-2.5 -right-1 bg-amber-400 text-slate-950 font-black text-[11px] px-1.5 rounded shadow badge-pop border border-amber-300">4</span>
+          <i class="fa-solid fa-anchor text-sky-400 text-sm"></i>
+          <span>틀 고정</span>
+        </button>
+
+        <!-- Slot 5 -->
+        <button onclick="triggerAction(5)" class="relative group flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs transition">
+          <span id="badge-5" class="hidden absolute -top-2.5 -right-1 bg-amber-400 text-slate-950 font-black text-[11px] px-1.5 rounded shadow badge-pop border border-amber-300">5</span>
+          <i class="fa-solid fa-arrows-left-right-to-line text-yellow-400 text-sm"></i>
+          <span>열 너비 자동 맞춤</span>
+        </button>
+
+        <!-- Reset Button -->
+        <button onclick="resetData()" class="ml-auto flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 rounded-lg transition border border-rose-500/30">
+          <i class="fa-solid fa-rotate-left"></i> 초기화
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Toast / Advice -->
+    <div id="coachMessage" class="bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 text-xs md:text-sm px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all">
+      <i class="fa-solid fa-bullhorn text-emerald-400"></i>
+      <span>선배: "키보드에서 <strong>Alt</strong> 누르고 <strong>1~5</strong>번 톡 쳐봐라! 5번 누르면 ###으로 잘린 열이 쫙 펴진다."</span>
+    </div>
+
+    <!-- Excel Sheet Mockup -->
+    <div class="bg-white rounded-xl p-3 shadow-inner overflow-x-auto text-slate-800 max-h-[360px] overflow-y-auto relative" id="tableContainer">
+      <table class="excel-grid w-full text-xs text-left" id="excelTable">
+        <thead id="sheetThead" class="transition-all">
+          <tr>
+            <th class="w-8 text-center bg-gray-200"></th>
+            <th class="col-header px-3 py-1.5 text-center font-bold" data-col="0">A</th>
+            <th class="col-header px-3 py-1.5 text-center font-bold" data-col="1">B</th>
+            <th class="col-header px-3 py-1.5 text-center font-bold" data-col="2">C</th>
+            <th class="col-header px-3 py-1.5 text-center font-bold" data-col="3">D</th>
+            <th class="col-header px-3 py-1.5 text-center font-bold" data-col="4">E</th>
+          </tr>
+        </thead>
+        <tbody id="sheetBody">
+          <!-- Filled Dynamically -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Quick Selection Helpers -->
+    <div class="flex flex-wrap gap-2 text-xs">
+      <span class="text-slate-400 self-center font-semibold">실습 추천 치트:</span>
+      <button onclick="selectRange('rateFormula')" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 rounded text-slate-200">① 수식 영역 (E2:E7) -> Alt+1</button>
+      <button onclick="selectRange('header')" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 rounded text-slate-200">② 헤더 (A1:E1) -> Alt+2</button>
+      <button onclick="selectRange('mergeTarget')" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 rounded text-slate-200">③ 합계 라벨 (A7:B7) -> Alt+3</button>
+      <button onclick="triggerAction(4)" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 rounded text-slate-200">④ 틀 고정 토글 -> Alt+4</button>
+      <button onclick="triggerAction(5)" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded font-bold">⑤ ### 너비 펴기 -> Alt+5</button>
+    </div>
+
+  </main>
+
+  <footer class="mt-6 text-center text-xs text-slate-500">
+    네이버 블로그 [칼퇴 치트키] 시리즈 | 마우스 집어던지고 5시 50분에 가방 싸자.
+  </footer>
+
+  <script>
+    // Initial Mock Data: matches blog and sales_sample_data.md exactly (A1:E7)
+    const initialRows = [
+      ["부서명", "담당자", "3분기 목표", "3분기 실적", "달성률"],
+      ["영업1팀", "김철수", 50000000, 58500000, "=D2/C2"],
+      ["영업1팀", "이영희", 45000000, 42000000, "=D3/C3"],
+      ["영업2팀", "박민수", 60000000, 67200000, "=D4/C4"],
+      ["영업2팀", "최지우", 40000000, 38500000, "=D5/C5"],
+      ["영업3팀", "정태양", 55000000, 59000000, "=D6/C6"],
+      ["합계", "-", 250000000, 265200000, "=AVERAGE(E2:E6)"]
+    ];
+
+    let cellState = [];
+    let selectedCells = new Set();
+    let isAltMode = false;
+    let hasFilter = false;
+    let isFreezePane = false;
+    let isAutoWidth = false;
+    let isMergedTotal = false;
+
+    function initTable() {
+      const tbody = document.getElementById('sheetBody');
+      tbody.innerHTML = '';
+      cellState = [];
+      selectedCells.clear();
+      hasFilter = false;
+      isFreezePane = false;
+      isAutoWidth = false;
+      isMergedTotal = false;
+
+      updateFreezeStyle();
+
+      initialRows.forEach((row, rIdx) => {
+        const tr = document.createElement('tr');
+        const rState = [];
+
+        // Row Index Th
+        const rowHeader = document.createElement('th');
+        rowHeader.className = "text-center text-gray-500";
+        rowHeader.innerText = rIdx + 1;
+        tr.appendChild(rowHeader);
+
+        row.forEach((val, cIdx) => {
+          const td = document.createElement('td');
+          td.className = "px-3 py-2 cursor-pointer transition-all duration-75 text-slate-800 bg-white";
+          td.dataset.row = rIdx;
+          td.dataset.col = cIdx;
+
+          const isFormula = typeof val === 'string' && val.startsWith('=');
+          const cellObj = {
+            rawVal: val,
+            isFormula: isFormula,
+            hasPastedValue: false,
+            align: 'text-left'
+          };
+          rState.push(cellObj);
+
+          td.addEventListener('click', (e) => {
+            if (e.shiftKey) {
+              selectedCells.add(`${rIdx}-${cIdx}`);
+            } else {
+              selectedCells.clear();
+              selectedCells.add(`${rIdx}-${cIdx}`);
+            }
+            renderTableStyles();
+          });
+
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+        cellState.push(rState);
+      });
+
+      renderTableStyles();
+    }
+
+    function renderTableStyles() {
+      const tbody = document.getElementById('sheetBody');
+      const trs = tbody.querySelectorAll('tr');
+
+      trs.forEach((tr, rIdx) => {
+        const tds = tr.querySelectorAll('td');
+        
+        // Handling Merged row: Row index 6 is the 합계 row (A7:B7)
+        if (rIdx === 6 && isMergedTotal) {
+          tds[0].colSpan = 2;
+          tds[0].className = "px-3 py-2 text-center font-bold bg-amber-50 text-slate-900 border border-slate-300";
+          tds[0].innerText = "합계 (병합됨)";
+          tds[1].style.display = "none";
+        } else {
+          tds[0].colSpan = 1;
+          tds[1].style.display = "";
+        }
+
+        tds.forEach((td, cIdx) => {
+          if (rIdx === 6 && isMergedTotal && cIdx === 1) return;
+
+          const state = cellState[rIdx][cIdx];
+          const isSelected = selectedCells.has(`${rIdx}-${cIdx}`);
+
+          let classes = ["px-2", "py-1.5", "cursor-pointer", "transition-all", "duration-75", "border", "border-gray-200"];
+          
+          if (isSelected) {
+            classes.push("selected");
+          } else {
+            classes.push("bg-white");
+          }
+
+          classes.push(state.align);
+          td.className = classes.join(" ");
+
+          // Value Display Logic
+          let text = state.rawVal;
+
+          // E column formulas or pasted values
+          if (state.isFormula) {
+            if (state.hasPastedValue) {
+              const calcRates = ["117%", "93%", "112%", "96%", "107%", "105%"];
+              text = `<span class="text-emerald-700 font-semibold">${calcRates[rIdx - 1]}</span> <span class="text-[10px] text-gray-400 font-mono">(값)</span>`;
+            } else {
+              text = `<span class="text-indigo-600 font-mono text-[11px] bg-indigo-50 px-1 py-0.5 rounded">${state.rawVal}</span>`;
+            }
+          } else if (typeof text === 'number') {
+            if (!isAutoWidth) {
+              // Show cramped ### if width is not adjusted
+              text = `<span class="text-rose-500 font-mono font-bold tracking-tighter">###</span>`;
+            } else {
+              text = text.toLocaleString('ko-KR');
+            }
+          }
+
+          // Header filter icon (Alt+2)
+          if (rIdx === 0 && hasFilter) {
+            td.innerHTML = `<div class="flex items-center justify-between gap-1 font-bold">
+                              <span>${state.rawVal}</span>
+                              <span class="bg-gray-200 border border-gray-400 text-[9px] px-1 rounded shadow-sm text-slate-700">▼</span>
+                            </div>`;
+          } else if (typeof text === 'string' && (text.includes('<span') || text.includes('합계'))) {
+            td.innerHTML = text;
+          } else {
+            td.innerText = text;
+          }
+        });
+      });
+    }
+
+    function updateFreezeStyle() {
+      const thead = document.getElementById('sheetThead');
+      if (isFreezePane) {
+        thead.className = "sticky top-0 shadow-md border-b-2 border-emerald-600 z-10 bg-gray-100";
+      } else {
+        thead.className = "transition-all";
+      }
+    }
+
+    function selectRange(type) {
+      selectedCells.clear();
+      if (type === 'rateFormula') {
+        for (let r = 1; r < 7; r++) selectedCells.add(`${r}-4`);
+        setCoachMsg("달성률 수식 영역(E2:E7) 잡았다! <b>Alt + 1</b>을 쳐서 수식 날리고 알맹이 값으로 박아봐.");
+      } else if (type === 'header') {
+        for (let c = 0; c < 5; c++) selectedCells.add(`0-${c}`);
+        setCoachMsg("헤더 영역(A1:E1) 잡았다! <b>Alt + 2</b> 눌러서 1초 만에 필터 박아라.");
+      } else if (type === 'mergeTarget') {
+        selectedCells.add(`6-0`);
+        selectedCells.add(`6-1`);
+        setCoachMsg("합계 라벨(A7:B7) 잡았다! <b>Alt + 3</b> 눌러서 손목 편하게 한 번에 병합해라.");
+      }
+      renderTableStyles();
+    }
+
+    function triggerAction(slotNum) {
+      switch (slotNum) {
+        case 1: // 값 붙여넣기
+          if (selectedCells.size === 0) {
+            setCoachMsg("수식 영역(E열) 먼저 클릭하거나 아래 '① 수식 영역' 버튼을 눌러줘!", true);
+            return;
+          }
+          selectedCells.forEach(key => {
+            const [r, c] = key.split('-').map(Number);
+            if (cellState[r][c].isFormula) {
+              cellState[r][c].hasPastedValue = true;
+            }
+          });
+          setCoachMsg("⚡ <b>Alt + 1 (값 붙여넣기)</b> 시전 완료! 수식 찌꺼기 털어내고 깨끗한 알맹이 데이터로 박제 완료.");
+          break;
+
+        case 2: // 자동 필터
+          hasFilter = !hasFilter;
+          setCoachMsg(hasFilter 
+            ? "⚡ <b>Alt + 2 (자동 필터)</b> 장착! 마우스로 [데이터] 탭 헤맬 시간에 이미 필터 끝났다." 
+            : "⚡ 필터 해제 완료!");
+          break;
+
+        case 3: // 병합하고 가운데 맞춤
+          isMergedTotal = !isMergedTotal;
+          setCoachMsg(isMergedTotal 
+            ? "⚡ <b>Alt + 3 (병합하고 가운데 맞춤)</b> 발동! 클릭 3번 하던 보고서 양식 1초 컷." 
+            : "⚡ 병합 취소 완료!");
+          break;
+
+        case 4: // 틀 고정
+          isFreezePane = !isFreezePane;
+          updateFreezeStyle();
+          setCoachMsg(isFreezePane 
+            ? "⚡ <b>Alt + 4 (틀 고정)</b> 헤더 행 고정 완료! 스크롤 내려도 제목 안 사라진다." 
+            : "⚡ 틀 고정 해제 완료!");
+          break;
+
+        case 5: // 열 너비 자동 맞춤
+          isAutoWidth = !isAutoWidth;
+          setCoachMsg(isAutoWidth 
+            ? "⚡ <b>Alt + 5 (열 너비 자동 맞춤)</b> 발동! 답답하던 <b>###</b> 전부 시원하게 정렬 끝." 
+            : "⚡ 열 너비 원복 (좁아져서 다시 ### 발생)");
+          break;
+      }
+
+      renderTableStyles();
+      hideAltBadges();
+      isAltMode = false;
+    }
+
+    function setCoachMsg(msg, isWarning = false) {
+      const box = document.getElementById('coachMessage');
+      box.innerHTML = `<i class="fa-solid ${isWarning ? 'fa-triangle-exclamation text-amber-400' : 'fa-bullhorn text-emerald-400'}"></i> <span>선배: ${msg}</span>`;
+      if (isWarning) {
+        box.className = "bg-amber-950/60 border border-amber-500/40 text-amber-200 text-xs md:text-sm px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all";
+      } else {
+        box.className = "bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 text-xs md:text-sm px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all";
+      }
+    }
+
+    function showAltBadges() {
+      for (let i = 1; i <= 5; i++) {
+        const badge = document.getElementById(`badge-${i}`);
+        if (badge) badge.classList.remove('hidden');
+      }
+    }
+
+    function hideAltBadges() {
+      for (let i = 1; i <= 5; i++) {
+        const badge = document.getElementById(`badge-${i}`);
+        if (badge) badge.classList.add('hidden');
+      }
+    }
+
+    function resetData() {
+      initTable();
+    }
+
+    // SheetJS Export Implementation: Downloads real .xlsx with formulas and narrow col width for practical testing
+    document.getElementById('downloadXlsxBtn').addEventListener('click', () => {
+      const wsData = [
+        ["부서명", "담당자", "3분기 목표", "3분기 실적", "달성률"],
+        ["영업1팀", "김철수", 50000000, 58500000, { t: 'n', f: 'D2/C2' }],
+        ["영업1팀", "이영희", 45000000, 42000000, { t: 'n', f: 'D3/C3' }],
+        ["영업2팀", "박민수", 60000000, 67200000, { t: 'n', f: 'D4/C4' }],
+        ["영업2팀", "최지우", 40000000, 38500000, { t: 'n', f: 'D5/C5' }],
+        ["영업3팀", "정태양", 55000000, 59000000, { t: 'n', f: 'D6/C6' }],
+        ["합계", "-", 250000000, 265200000, { t: 'n', f: 'AVERAGE(E2:E6)' }]
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+      // Intentionally narrow C & D columns so Excel initially displays '###'
+      ws['!cols'] = [
+        { wch: 12 }, // A열 (부서명)
+        { wch: 10 }, // B열 (담당자)
+        { wch: 6 },  // C열 (좁게 설정 -> 엑셀에서 ### 발생 유도)
+        { wch: 6 },  // D열 (좁게 설정 -> 엑셀에서 ### 발생 유도)
+        { wch: 14 }  // E열 (달성률 수식)
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "실습데이터");
+      XLSX.writeFile(wb, "칼퇴치트키_빠른실행도구모음_TOP5.xlsx");
+
+      setCoachMsg("📂 <b>실습용 원본 엑셀 파일(.xlsx) 다운로드 완료!</b> 엑셀 열자마자 숫자가 ###으로 뜰 텐데, Alt + 5 눌러서 쫙 펴봐라.");
+    });
+
+    // Keyboard Event Listener for Alt + 1,2,3,4,5
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Alt') {
+        e.preventDefault();
+        isAltMode = !isAltMode;
+        if (isAltMode) {
+          showAltBadges();
+          setCoachMsg("🔥 <b>Alt 키 감지!</b> 번호(1~5) 눌러서 즉시 실행해라!");
+        } else {
+          hideAltBadges();
+        }
+      } else if (isAltMode && ['1', '2', '3', '4', '5'].includes(e.key)) {
+        e.preventDefault();
+        triggerAction(parseInt(e.key, 10));
+      } else if (e.key === 'Escape') {
+        isAltMode = false;
+        hideAltBadges();
+      }
+    });
+
+    // Auto Init
+    initTable();
+  </script>
+</body>
+</html>
